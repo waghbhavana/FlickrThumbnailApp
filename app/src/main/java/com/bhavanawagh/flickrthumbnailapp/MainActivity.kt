@@ -1,5 +1,6 @@
 package com.bhavanawagh.flickrthumbnailapp
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -34,6 +35,7 @@ import com.bhavanawagh.flickrthumbnailapp.data.Item
 import com.bhavanawagh.flickrthumbnailapp.screens.ThumbnailDetailScreen
 import com.bhavanawagh.flickrthumbnailapp.screens.ThumbnailsScreen
 import com.bhavanawagh.flickrthumbnailapp.ui.theme.FlickrThumbnailAppTheme
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -57,22 +59,27 @@ fun NavigationStack(items: List<Item>){
 
         composable(route=Screens.ThumbnailsScreen.route){
             ThumbnailsScreen(items) { item: Item ->
-                // val encodedItem = Uri.encode(Gson().toJson(item))
+                 val encodedItem = Uri.encode(Gson().toJson(item))
                 println("item clicked")
+                navController.navigate(Screens.DetailScreen.route+"/$encodedItem")
             }
 
 
 
         }
 
-//        composable(route=Screens.DetailScreen.route +"?item={text}" ,
-//            listOf( navArgument("item") {
-//                type = NavType.
-//                nullable = false
-//            })
-//        ){
-//            //ThumbnailDetailScreen()
-//        }
+        composable(route=Screens.DetailScreen.route+"/{item}" ,
+            arguments = listOf(navArgument("item") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val itemJson = backStackEntry.arguments?.getString("item")
+            val item = Gson().fromJson(itemJson, Item::class.java) // Decode recipe JSON
+            if (item != null) {
+                ThumbnailDetailScreen(item = item)
+            //                {
+//                  //  navController.navigateUp()
+//                }
+            }
+        }
 
     }
 }
